@@ -1,0 +1,71 @@
+{% extends 'layout.html' %}
+
+{% set active_page = "movies" %}
+
+{% block content %}
+
+<main id="main">
+    <header>
+        <h1>{{movie.title}}</h1>
+    </header>
+
+    <div class="movie" style="margin: 30px 0 0;">
+        <h2>{{movie.title}}</h2>
+        <p>{{movie.description}}</p>
+        <p>
+            <strong>Year</strong>: {{movie.year}}
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <strong>Runtime minutes</strong>: {{movie.runtime_minutes}}
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <strong>Rating</strong>: {{movie.rating}}
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <strong>Votes</strong>: {{movie.votes}}
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <strong>Revenue millions</strong>: {{movie.revenue_millions}}
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <strong>Metascore</strong>: {{movie.meta_score}}
+        </p>
+        <div style="clear:both">
+            <strong class="pills-label">Genres: </strong>
+            {% for genre in movie.genres %}
+            <button class="btn-general" onclick="location.href='{{ genre_urls[genre.name] }}'">{{ genre.name }}</button>
+            {% endfor %}
+        </div>
+        <div style="clear:both">
+            <strong class="pills-label">Actors: </strong>
+            {% for actor in movie.actors %}
+                <button class="btn-general" onclick="location.href='{{ actor_urls[actor.name] }}'">{{ actor.name }}</button>
+            {% endfor %}
+        </div>
+        <div style="clear:both">
+            <strong class="pills-label">Directors: </strong>
+            {% for director  in movie.directors %}
+                <button class="btn-general" onclick="location.href='{{ director_urls[director.name] }}'">{{ director.name }}</button>
+            {% endfor %}
+        </div>
+
+        <div class="form-wrapper" style="clear: both;">
+            <form action="{{handler_url}}" method="post">
+                {{form.movie_id}} <!-- Need to include this hidden field as it tracks the movie being commented. -->
+                {{form.csrf_token}} <!-- Need to include this token - Flask WTForms requires it. -->
+                <br>
+                <div class ="form-field">{{form.comment.label}}: </br>{{form.comment(size = 100, placeholder="type your comment", class="textarea", cols="50", rows="6", wrap="hard")}}
+                    {% if form.comment.errors %}
+                        <ul class="errors">
+        	            {% for error in form.comment.errors %}
+        		            <li>{{error}}</li>
+                        {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                {{ form.submit }}
+            </form>
+        </div>
+        <div style="clear:both">
+            {% for comment in movie.comments %}
+                <p class="movie-comment">{{comment.comment_text}}, by {{comment.username}}, {{comment.timestamp}}</p>
+            {% endfor %}
+        </div>
+    </div>
+</main>
+{% endblock %}

@@ -1,0 +1,38 @@
+<aside id="sidebar" class="search">
+
+    <header>
+        <h1>Search</h1>
+    </header>
+
+    <form action="{{ url_for('movies_bp.movies_by_genre') }}" method="get">
+
+        <div class="search-box" id="search-genre">
+            <select class="js-example-basic-single" name="genre">
+                <option value="">--- All ---</option>
+                {% for genre in genre_urls.keys() %}
+                <option value="{{ genre }}" {% if genre == genre_name %}selected{% endif %}>{{genre}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="search-box" id="search-actor">
+            <select class="js-example-basic-single" name="actor">
+                <option value="">--- All ---</option>
+                {% for actor in actor_urls.keys() %}
+                <option value="{{ actor }}" {% if actor == actor_name %}selected{% endif %}>{{actor}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="search-box" id="search-director">
+            <select class="js-example-basic-single" name="director">
+                <option value="">--- All ---</option>
+                {% for director in director_urls.keys() %}
+                <option value="{{ director }}" {% if director == director_name %}selected{% endif %}>{{director}}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button class="btn-general" type="submit">Search</button>
+
+    </form>
+
+</aside>
