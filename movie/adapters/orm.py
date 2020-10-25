@@ -83,18 +83,30 @@ def map_model_to_tables():
         '_password': users.c.password,
         '_reviews': relationship(model.Review, backref='_user')
     })
-    mapper(model.Review, reviews, propertise={
+    mapper(model.Review, reviews, properties={
         '_comment': reviews.c.comment,
         '_timestamp': reviews.c.timestamp
     })
 
-    movies_mapper = mapper(model.Movie, movies, propertise={
+    movies_mapper = mapper(model.Movie, movies, properties={
         '_id': movies.c.id,
         '_year': movies.c.year,
         '_title': movies.c.title,
-        'description': movies.c.description,
+        '_description': movies.c.description,
+        '_runtime_minutes': movies.c.runtime_minutes,
+        '_rating': movies.c.rating,
+        '_votes': movies.c.votes,
+        '_revenue_millions': movies.c.revenue_millions,
+        '_meta_score': movies.c.meta_score,
+        '_comments': relationship(model.Review, backref='_movie'),
+
         
     })
+
+
+
+
+
 
 
 

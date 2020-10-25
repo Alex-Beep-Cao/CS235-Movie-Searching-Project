@@ -16,8 +16,8 @@ class Config:
     SECRET_KEY = environ.get('SECRET_KEY')
 
     # Database configuration
-    SQLALCHEMY_DATABASE = environ.get('SQLALCHEMY_DATABASE_URI')
+    SQLALCHEMY_DATABASE_URI = environ.get('SQLALCHEMY_DATABASE_URI')
     SQLALCHEMY_ECHO = True
-    SQLALCHEMY_TRACK_MODIFICATION = False
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     REPOSITORY = environ.get('REPOSITORY')
