@@ -1,10 +1,15 @@
 import os
 import pytest
 
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, clear_mappers
+
 from movie import create_app
-from movie.adapters import memory_repository
+from movie.adapters import memory_repository, database_repository
+from movie.adapters.orm import metadata, map_model_to_tables
 from movie.adapters.memory_repository import MemoryRepository
 # /Users/huiyuancao/Desktop/flask-movie/tests/data
+
 path = "/Users/huiyuancao/Desktop/"
 TEST_DATA_PATH = os.path.join(path, 'flask-movie/tests/data/')
 
@@ -12,13 +17,40 @@ TEST_DATA_PATH = os.path.join(path, 'flask-movie/tests/data/')
 # TEST_DATA_PATH = os.path.join('C:', os.sep, 'Users', 'ianwo', 'OneDrive', 'Documents', 'PythonDev', 'repo 02.07.2020',
 #                               'COVID-19', 'tests', 'data')
 
-
+TEST_DATABASE_URI_IN_MEMORY = 'sqlite://'
+TEST_DATABASE_URI_FILE = 'sqlite:///movie-test.db'
 
 @pytest.fixture
 def in_memory_repo():
     repo = MemoryRepository()
     memory_repository.populate(TEST_DATA_PATH, repo)
     return repo
+
+@pytest.fixture
+def database_engine():
+    engine = create_engine(TEST_DATABASE_URI_FILE)
+    clear_mappers()
+    metadata.create_all(engine)  # Conditionally create database tables.
+    for table in reversed(metadata.sorted_tables):  # Remove any data from the tables.
+        engine.execute(table.delete())
+    map_model_to_tables()
+    database_repository.populate(engine, TEST_DATA_PATH)
+    yield engine
+    metadata.drop_all(engine)
+    clear_mappers()
+
+@pytest.fixture
+def empty_session():
+    engine = create_engine(TEST_DATABASE_URI_IN_MEMORY)
+    metadata.create_all(engine)
+    for table in reversed(metadata.sorted_tables):
+        engine.execute(table.delete())
+    map_model_to_tables()
+    session_factory = sessionmaker(bind=engine)
+    yield session_factory()
+    metadata.drop_all(engine)
+    clear_mappers()
+
 
 
 @pytest.fixture

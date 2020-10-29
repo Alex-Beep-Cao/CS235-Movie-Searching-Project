@@ -28,52 +28,57 @@ reviews = Table(
 movies = Table(
     'movies', metadata,
     Column('id', Integer, primary_key=True, autoincrement=True),
-    Column('year', Integer, nullable=False),
     Column('title', String(1024), nullable=False),
+    # Column('genre', String(1024), nullable=False),
     Column('description', String(1024), nullable=False),
+    # Column('director', String(1024), nullable=False),
+    # Column('actor', String(1024), nullable=False),
+    Column('year', Integer, nullable=False),
     Column('runtime_minutes', Float, nullable=False),
-    Column('meta_score', Integer, nullable=False),
     Column('rating', Float, nullable=False),
     Column('votes', Integer, nullable=False),
-    Column('revenue_millions', Float, nullable=False)
+    Column('revenue', Float, nullable=False),
+    Column('metascore', Integer, nullable=False)
 
 )
-
+# Rank,Title,Genre,Description,Director,Actors,Year,Runtime (Minutes),Rating,Votes,Revenue (Millions),Metascore
 genres = Table(
     'genres', metadata,
-    Column('name', String(64), primary_key=True, nullable=False),
+    Column('id', Integer, primary_key=True, autoincrement=True),
+    Column('name', String(64), nullable=False)
 )
 
 directors = Table(
     'directors', metadata,
-    Column('name', String(64), primary_key=True, nullable=False),
+    Column('id', Integer, primary_key=True, autoincrement=True),
+    Column('name', String(64), nullable=False),
 )
 
 actors = Table(
     'actors', metadata,
-    Column('name', String(64), primary_key=True, nullable=False),
+    Column('id', Integer, primary_key=True, autoincrement=True),
+    Column('name', String(64), nullable=False),
 )
 
 movie_genres = Table(
     'movies_genres', metadata,
     Column('id', Integer, primary_key=True, nullable=False),
     Column('genres_name', String(64), ForeignKey('genres.name')),
-    Column('movies_id', Integer, ForeignKey('movies.id'))
+    Column('movie_id', Integer, ForeignKey('movies.id'))
 )
-
 
 movies_directors = Table(
     'movies_directors', metadata,
     Column('id', Integer, primary_key=True, nullable=False),
     Column('directors_name', String(64), ForeignKey('directors.name')),
-    Column('movies_id', Integer, ForeignKey('movies.id'))
+    Column('movie_id', Integer, ForeignKey('movies.id'))
 )
 
 movies_actors = Table(
     'movies_actors', metadata,
     Column('id', Integer, primary_key=True, nullable=False),
     Column('actors_name', String(64), ForeignKey('actors.name')),
-    Column('movies_id', Integer, ForeignKey('movies.id'))
+    Column('movie_id', Integer, ForeignKey('movies.id'))
 )
 
 
@@ -83,12 +88,12 @@ def map_model_to_tables():
         '_password': users.c.password,
         '_reviews': relationship(model.Review, backref='_user')
     })
-    mapper(model.Review, reviews, properties={
-        '_comment': reviews.c.comment,
-        '_timestamp': reviews.c.timestamp
-    })
-
-    movies_mapper = mapper(model.Movie, movies, properties={
+    #     mapper(model.Review, reviews, properties={
+    #         '_comment': reviews.c.comment,
+    #         '_timestamp': reviews.c.timestamp
+    #     })
+    #
+    mapper(model.Movie, movies, properties={
         '_id': movies.c.id,
         '_year': movies.c.year,
         '_title': movies.c.title,
@@ -96,17 +101,9 @@ def map_model_to_tables():
         '_runtime_minutes': movies.c.runtime_minutes,
         '_rating': movies.c.rating,
         '_votes': movies.c.votes,
-        '_revenue_millions': movies.c.revenue_millions,
-        '_meta_score': movies.c.meta_score,
+        '_revenue': movies.c.revenue,
+        '_metascore': movies.c.metascore,
         '_comments': relationship(model.Review, backref='_movie'),
 
-        
     })
-
-
-
-
-
-
-
-
+#
