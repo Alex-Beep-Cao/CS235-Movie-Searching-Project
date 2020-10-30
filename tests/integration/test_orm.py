@@ -74,35 +74,21 @@ def insert_genres(empty_session):
     empty_session.execute(
         'INSERT INTO genres (name) VALUES ("News"),("New Zealand")'
     )
-    rows = list(empty_session.execute('SELECT name from genres'))
+    rows = list(empty_session.execute('SELECT id from genres'))
     keys = (tuple(row[0] for row in rows))
     return keys
 
 
 def insert_movie_genre_associations(empty_session, movie_key, genres_name):
-    stmt = 'INSERT INTO movies_genres (movie_id, genres_name) VALUES (:movie_id, :genres_name)'
+    stmt = 'INSERT INTO movies_genres (movie_id, genres_id) VALUES (:movie_id, :genres_id)'
     for genre_key in genres_name:
         # genre_key = str(genre_key)
-        empty_session.execute(stmt, {'movie_id': movie_key, 'genres_name': genre_key})
+        empty_session.execute(stmt, {'movie_id': movie_key, 'genres_id': genre_key})
 
 
 def make_genre():
     genre = Genre("News")
     return genre
-
-
-def test_loading_of_genred_movie(empty_session):
-    movie_key = insert_movie(empty_session)
-    genre_keys = insert_genres(empty_session)
-    insert_movie_genre_associations(empty_session, movie_key, genre_keys)
-
-    movie = empty_session.query(Movie).get(movie_key)
-    genres = [key for key in genre_keys]
-
-    for genre in genres:
-        genre = Genre(genre)
-        assert movie.is_genre_by(genre)
-        assert genre.is_applied_to(movie)
 
 
 def test_loading_of_users(empty_session):
