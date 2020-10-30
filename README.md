@@ -4,6 +4,15 @@
 
 A Web application that demonstrates use of Python's Flask framework. The application makes use of libraries such as the Jinja templating library and WTForms. Architectural design patterns and principles including Repository, Dependency Inversion and Single Responsibility have been used to design the application. The application uses Flask Blueprints to maintain a separation of concerns between application functions. Testing includes unit and end-to-end testing using the pytest tool. 
 
+Add database by using SQLALCHEMY. create tables, mapper model and table.
+
+Testing orm and populate.
+
+Finally, finished this program, user can login - out, register. Also can search movie by genre, actor and director.
+
+Spend a lots of time on  my first program. this is a very good experience. 
+
+
 ## Installation
 
 **Installation via requirements.txt**
