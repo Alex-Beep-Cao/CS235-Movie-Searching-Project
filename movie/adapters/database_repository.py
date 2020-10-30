@@ -89,46 +89,129 @@ class SqlAlchemyRepository(AbstractRepository):
         return movie
 
     def get_number_of_movies(self):
-        pass
+        number_of_movies = self._session_cm.session.query(Movie).count()
+        return number_of_movies
 
     def get_movies_by_id(self, id_list):
-        pass
+        movies = self._session_cm.session.query(Movie).filter(Movie._id.in_(id_list)).all()
+        return movies
 
     def get_movie_ids_all(self):
-        pass
+        movie_ids =[]
+        ids = self._session_cm.session.execute(
+            'SELECT id FROM movies').fetchall()
+        for item in ids:
+            i = item[0]
+            movie_ids.append(i)
+
+        return movie_ids
 
     def get_movie_ids_for_genre(self, genre_name: str):
-        pass
+        movies_ids = []
+
+        # Use native SQL to retrieve article ids, since there is no mapped class for the article_tags table.
+        row = self._session_cm.session.execute('SELECT id FROM genres WHERE name = :genre_name',
+                                               {'genre_name': genre_name}).fetchone()
+
+        if row is None:
+            # No tag with the name tag_name - create an empty list.
+            movies_ids = list()
+        else:
+            genre_id = row[0]
+
+            # Retrieve article ids of articles associated with the tag.
+            movies_ids = self._session_cm.session.execute(
+                'SELECT movie_id FROM movies_genres WHERE genres_id = :genres_id ORDER BY movie_id ASC',
+                {'genres_id': genre_id}
+            ).fetchall()
+            movies_ids = [id[0] for id in movies_ids]
+
+        return movies_ids
+
+    # [(10,),(2,),(4,)]
+    # for item in movie_ids:
+    #     id = item[0] [10,2,4]
 
     def get_movie_ids_for_actor(self, actor_name: str):
-        pass
+        movies_ids = []
+
+        # Use native SQL to retrieve article ids, since there is no mapped class for the article_tags table.
+        row = self._session_cm.session.execute('SELECT id FROM actors WHERE name = :actor_name',
+                                               {'actor_name': actor_name}).fetchone()
+
+        if row is None:
+            # No tag with the name tag_name - create an empty list.
+            movies_ids = list()
+        else:
+            actor_id = row[0]
+
+            # Retrieve article ids of articles associated with the tag.
+            movies_ids = self._session_cm.session.execute(
+                'SELECT movie_id FROM movies_actors WHERE actors_id = :actors_id ORDER BY movie_id ASC',
+                {'actors_id': actor_id}
+            ).fetchall()
+            movies_ids = [id[0] for id in movies_ids]
+
+        return movies_ids
 
     def get_movie_ids_for_director(self, director_name: str):
-        pass
+        movies_ids = []
+
+        # Use native SQL to retrieve article ids, since there is no mapped class for the article_tags table.
+        row = self._session_cm.session.execute('SELECT id FROM directors WHERE name = :director_name',
+                                               {'director_name': director_name}).fetchone()
+
+        if row is None:
+            # No tag with the name tag_name - create an empty list.
+            movies_ids = list()
+        else:
+            director_id = row[0]
+
+            # Retrieve article ids of articles associated with the tag.
+            movies_ids = self._session_cm.session.execute(
+                'SELECT movie_id FROM movies_directors WHERE directors_id = :directors_id ORDER BY movie_id ASC',
+                {'directors_id': director_id}
+            ).fetchall()
+            movies_ids = [id[0] for id in movies_ids]
+
+        return movies_ids
 
     def add_genre(self, genre: Genre):
-        pass
+        with self._session_cm as scm:
+            scm.session.add(genre)
+            scm.commit()
 
     def get_genres(self) -> List[Genre]:
-        pass
+        genres = self._session_cm.session.query(Genre).all()
+        return genres
 
     def add_actor(self, actor: Actor):
-        pass
+        with self._session_cm as scm:
+            scm.session.add(actor)
+            scm.commit()
 
     def get_actors(self) -> List[Actor]:
-        pass
+        actors = self._session_cm.session.query(Actor).all()
+        return actors
 
     def add_director(self, director: Director):
-        pass
+        with self._session_cm as scm:
+            scm.session.add(director)
+            scm.commit()
 
     def get_directors(self) -> List[Director]:
-        pass
+        directors = self._session_cm.session.query(Director).all()
+        return directors
 
     def add_review(self, comment: Review):
-        pass
+        super().add_review(comment)
+        with self._session_cm as scm:
+            scm.session.add(comment)
+            scm.commit()
 
     def get_reviews(self):
-        pass
+        reviews = self._session_cm.session.query(Review).all()
+        return reviews
 
 
 def movie_record_generator(filename):
@@ -146,6 +229,7 @@ def movie_record_generator(filename):
             # movie_genres = ', '.join(data_row[2].split(','))
             movie_description = str(data_row[3])
             movie_director = str(data_row[4].strip())
+
             movie_actors_list = data_row[5].split((','))
             # movie_actors = ', '.join(data_row[5].split(','))
             movie_year = int(data_row[6])
@@ -153,36 +237,24 @@ def movie_record_generator(filename):
             movie_rating = float(data_row[8])
             movie_votes = int(data_row[9])
 
-            # length = len(movie_genres_list)
+            movie_genres = movie_genres_list
+            for i in movie_genres:
+                i.strip()
+                if i not in genre.keys():
+                    genre[i] = list()
+                genre[i].append(movie_key)
 
-            # for genre in genres:
-            #     if genre not in genres:
-            #         genres.append(genre)
+            movie_actors = movie_actors_list
+            for i in movie_actors:
+                i = i.strip()
+                if i not in actor.keys():
+                    actor[i] = list()
+                actor[i].append(movie_key)
 
-            # movie-director
-
-            movieid = movie_key
-
-            genres_list = movie_genres_list
-            for genre in genres_list:
-                if genre not in genres:
-                    genres.append(genre)
-                    mgen[genre] = list()
-                    mgen[genre].append(movieid)
-
-            director = movie_director
-
-            if director not in directors:
-                directors.append(director)
-                mdir[director] = list()
-                mdir[director].append(movieid)
-
-            actors_list = movie_actors_list
-            for actor in actors_list:
-                if actor not in actors:
-                    actors.append(actor)
-                    mact[actor] = list()
-                    mact[actor].append(movieid)
+            movie_directors = movie_director
+            if movie_directors not in director.keys():
+                director[movie_directors] = list()
+            director[movie_directors].append(movie_key)
 
             movie_revenue = str(data_row[10])
             if movie_revenue != "N/A":
@@ -195,59 +267,73 @@ def movie_record_generator(filename):
             else:
                 movie_metascore = "N/A"
 
-            yield movie_key, movie_title,  movie_description,  movie_year, \
+            yield movie_key, movie_title, movie_description, movie_year, \
                   runtime_minutes, movie_rating, movie_votes, movie_revenue, movie_metascore
 
 
 def movie_director_generator():
     movie_director_key = 0
-    for director in mdir.keys():
-        for movie_key in mdir[director]:
+    director_key = 0
+
+    for d in director.keys():
+        director_key += 1
+        for movie_key in director[d]:
             movie_director_key += 1
-            yield movie_director_key, director, movie_key
+            yield movie_director_key, director_key, movie_key
 
 
 def movie_genre_generator():
     movie_genre_key = 0
-    for genre in mgen.keys():
-        for movie_key in mgen[genre]:
+    genre_key = 0
+
+    for g in genre.keys():
+        genre_key += 1
+        for movie_key in genre[g]:
             movie_genre_key += 1
-            yield movie_genre_key, genre, movie_key
+            yield movie_genre_key, genre_key, movie_key
 
 
 def movie_actor_generator():
     movie_actor_key = 0
-    for actor in mact.keys():
-        for movie_key in mact[actor]:
+    actor_key = 0
+
+    for a in actor.keys():
+        actor_key += 1
+        for movie_key in actor[a]:
             movie_actor_key += 1
-            yield movie_actor_key, actor, movie_key
+            yield movie_actor_key, actor_key, movie_key
 
 
 def get_genre_records():
     genre_records = []
-    id = 1
-    for genre in genres:
-        genre_records.append((id, genre.strip()))
-        id += 1
+    genre_key = 0
+
+    for g in genre:
+        genre_key += 1
+        genre_records.append((genre_key, g))
+
     return genre_records
 
 
 def get_director_records():
     director_records = []
-    id = 1
-    for director in directors:
-        director_records.append((id, director))
-        id += 1
+    director_key = 0
+
+    for d in director:
+        director_key += 1
+        director_records.append((director_key, d))
+
     return director_records
 
 
 def get_actors_records():
     actor_records = []
-    id = 1
-    for actor in actors:
-        actor = actor.strip()
-        actor_records.append((id, actor))
-        id += 1
+    actor_key = 0
+
+    for a in actor:
+        actor_key += 1
+        actor_records.append((actor_key, a))
+
     return actor_records
 
 
@@ -278,17 +364,14 @@ def populate(engine: Engine, data_path: str):
     conn = engine.raw_connection()
     cursor = conn.cursor()
 
-    global genres, directors, actors, mdir, mgen, mact
-    genres = []
-    directors = []
-    actors = []
-    mdir = dict()
-    mgen = dict()
-    mact = dict()
+    global director, actor, genre
+    director = dict()
+    genre = dict()
+    actor = dict()
 
     insert_movies = """
                INSERT INTO movies (
-               id, title, description,  year, runtime_minutes, rating, votes, revenue, metascore)
+               id, title, description,  year, runtime_minutes, rating, votes, revenue_millions, meta_score)
                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)"""
     cursor.executemany(insert_movies, movie_record_generator(os.path.join(data_path, 'Data1000Movies.csv')))
     # a = cursor.fetchall()
@@ -320,19 +403,19 @@ def populate(engine: Engine, data_path: str):
 
     insert_movie_director = """
         INSERT INTO movies_directors (
-        id, directors_name, movie_id)
+        id, directors_id, movie_id)
         VALUES(?,?,?)"""
     cursor.executemany(insert_movie_director, movie_director_generator())
 
     insert_movie_genre = """
             INSERT INTO movies_genres (
-            id, genres_name, movie_id)
+            id, genres_id, movie_id)
             VALUES(?,?,?)"""
     cursor.executemany(insert_movie_genre, movie_genre_generator())
 
     insert_movie_actor = """
             INSERT INTO movies_actors (
-            id, actors_name, movie_id)
+            id, actors_id, movie_id)
             VALUES(?,?,?)"""
     cursor.executemany(insert_movie_actor, movie_actor_generator())
 

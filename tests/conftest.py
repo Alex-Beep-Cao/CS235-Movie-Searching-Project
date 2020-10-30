@@ -8,11 +8,11 @@ from movie import create_app
 from movie.adapters import memory_repository, database_repository
 from movie.adapters.orm import metadata, map_model_to_tables
 from movie.adapters.memory_repository import MemoryRepository
+
 # /Users/huiyuancao/Desktop/flask-movie/tests/data
 
 path = "/Users/huiyuancao/Desktop/"
 TEST_DATA_PATH = os.path.join(path, 'flask-movie/tests/data/')
-
 
 # TEST_DATA_PATH = os.path.join('C:', os.sep, 'Users', 'ianwo', 'OneDrive', 'Documents', 'PythonDev', 'repo 02.07.2020',
 #                               'COVID-19', 'tests', 'data')
@@ -20,11 +20,13 @@ TEST_DATA_PATH = os.path.join(path, 'flask-movie/tests/data/')
 TEST_DATABASE_URI_IN_MEMORY = 'sqlite://'
 TEST_DATABASE_URI_FILE = 'sqlite:///movie-test.db'
 
+
 @pytest.fixture
 def in_memory_repo():
     repo = MemoryRepository()
     memory_repository.populate(TEST_DATA_PATH, repo)
     return repo
+
 
 @pytest.fixture
 def database_engine():
@@ -39,6 +41,22 @@ def database_engine():
     metadata.drop_all(engine)
     clear_mappers()
 
+
+@pytest.fixture
+def session():
+    clear_mappers()
+    engine = create_engine(TEST_DATABASE_URI_IN_MEMORY)
+    metadata.create_all(engine)
+    for table in reversed(metadata.sorted_tables):
+        engine.execute(table.delete())
+    map_model_to_tables()
+    session_factory = sessionmaker(bind=engine)
+    database_repository.populate(engine, TEST_DATA_PATH)
+    yield session_factory()
+    metadata.drop_all(engine)
+    clear_mappers()
+
+
 @pytest.fixture
 def empty_session():
     engine = create_engine(TEST_DATABASE_URI_IN_MEMORY)
@@ -52,6 +70,19 @@ def empty_session():
     clear_mappers()
 
 
+@pytest.fixture
+def session_factory():
+    clear_mappers()
+    engine = create_engine(TEST_DATABASE_URI_IN_MEMORY)
+    metadata.create_all(engine)
+    for table in reversed(metadata.sorted_tables):
+        engine.execute(table.delete())
+    map_model_to_tables()
+    session_factory = sessionmaker(bind=engine)
+    database_repository.populate(engine, TEST_DATA_PATH)
+    yield session_factory
+    metadata.drop_all(engine)
+    clear_mappers()
 
 @pytest.fixture
 def client():

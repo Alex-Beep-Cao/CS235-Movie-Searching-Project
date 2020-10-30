@@ -121,6 +121,7 @@ def test_database_populate_select_all_movie(database_engine):
         #
         assert len(all_movies_names) == 5
 
+
 def test_database_populate_select_all_movie_actor(database_engine):
     # Get table information
     inspector = inspect(database_engine)
@@ -139,7 +140,6 @@ def test_database_populate_select_all_movie_actor(database_engine):
         assert len(all_movies_actor_ids) == 20
 
 
-
 def test_database_populate_select_all_movie_dir(database_engine):
     # Get table information
     inspector = inspect(database_engine)
@@ -156,6 +156,7 @@ def test_database_populate_select_all_movie_dir(database_engine):
             all_movies_dir_ids.append(row['id'])
         #
         assert len(all_movies_dir_ids) == 5
+
 
 def test_database_populate_select_all_movie_genre(database_engine):
     # Get table information

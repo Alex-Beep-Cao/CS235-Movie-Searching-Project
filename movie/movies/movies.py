@@ -75,10 +75,14 @@ def movies_by_genre():
     #     OUTPUT
     #     [1, 3]
 
+
+
     # Retrieve movie ids for movies that are genre with genre_name.
     if genre_name:
         genre_movie_ids = services.get_movie_ids_for_genre(genre_name, repo.repo_instance)
-        movie_ids = list(set.intersection(set(movie_ids), set(genre_movie_ids)))
+        movie_ids = list(set((movie_ids)).intersection(genre_movie_ids))
+
+
 
     # Retrieve movie ids for movies that are acted with actor_name.
     if actor_name:
