@@ -1,5 +1,5 @@
 # Movie Web Application
-The project has 2 steps, first one is in the main branch which not connect to the database, final version is in the branch assV2.
+The project has 2 steps, first one is in the main branch which not connect to the database, final version is in the branch ass2v1.
 
 ## Description
 
